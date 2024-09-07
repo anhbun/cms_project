@@ -22,11 +22,23 @@
         $username = $_POST['username'];
         $password = $_POST['password'];
 
+        // Check if the user is logged in
         if ($user->login($username,$password)) {
-            echo 'Login successful!';
-            // optional, redirect to dashboard or home page
-            header('Location: dashboard.php');
-            // exit
+            // Fetch the user's details from the database, including their role
+            $stmt = $pdo->prepare('SELECT * FROM users WHERE username = ?');
+            $stmt->execute([$username]);
+            $userData = $stmt->fetch();
+
+            if ($userData) {
+                session_start();
+                $_SESSION['user_id'] = $userData['id'];
+                $_SESSION['role'] = $userData['role']; // Store the role in the session
+
+                header('Location: dashboard.php');
+                exit;
+            } else {
+                echo 'User not found...';
+            }
         } else {
             echo 'Invalid username or password!';
         }

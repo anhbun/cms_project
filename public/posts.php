@@ -7,6 +7,8 @@
 
     session_start();
 
+    echo "Role: " . $_SESSION['role'];  // Debugging output
+
     $config = require __DIR__ . '/../config/database.php';
     $db = new Database($config);
     $pdo = $db->getConnection();
@@ -14,7 +16,7 @@
     $stmt = $pdo->query('SELECT posts.*, users.username FROM posts JOIN users ON posts.author_id = users.id ORDER BY created_at DESC');
     $posts = $stmt->fetchAll();
 
-    echo "<a href='create_post.php?id={$post['id']}'> New </a>";
+    echo "<br><a href='create_post.php?id={$post['id']}'> New </a>";
 
     foreach ($posts as $post) {
         echo "<h2>{$post['title']}</h2>";
