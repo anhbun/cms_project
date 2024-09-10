@@ -12,7 +12,7 @@
         exit;
     }
 
-    // Establish databse connection first
+    // Establish database connection first
     $config = require __DIR__ . '/../config/database.php';
     $db = new Database($config);
     $pdo = $db->getConnection();
