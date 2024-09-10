@@ -13,48 +13,57 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin' && $_SESSION['
     exit;
 }
 
+// Establish database connection
 $config = require __DIR__ . '/../config/database.php';
 $db = new Database($config);
 $pdo = $db->getConnection();
 
-// DEBUGGING output to ensure database connection
-if ($pdo) {
-    echo "DEBUG: Database connection established!<br>";
-} else {
-    echo "DEBUG: Database connection failed...<br>";
-    exit;
-}
-
 // Check if the post ID is provided in the URL and is valid
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $postId = (int)$_GET['id'];
-
-    // DEBUGGING output to show the queried post ID
-    echo "DEBUG: Querying post with ID: $postId<br>";
 
     // Fetch the post details from the database
     $stmt = $pdo->prepare('SELECT * FROM posts WHERE id = ?');
     $stmt->execute([$postId]);
     $post = $stmt->fetch();
 
-    // DEBUGGING output to confirm the fetch operation
-    if ($post) {
-        echo "DEBUG: Fetched post ID: " . htmlspecialchars($post['id']) . "<br>";
-        echo "DEBUG: Fetched post Title: " . htmlspecialchars($post['title']) . "<br>";
-    } else {
-        echo "DEBUG: No post found with ID: $postId<br>";
-    }
-
     // Check if the post exists
     if ($post) {
+        // Fetch categories
+        $categoryStmt = $pdo->query('SELECT * FROM categories');
+        $categories = $categoryStmt->fetchAll();
+
+        //Fatch all tags
+        $tagStmt = $pdo->query('SELECT * FROM tags');
+        $tags = $tagStmt->fetchAll();
+
+        // Fetch current tags for post
+        $currentTagsStmt = $pdo->prepare('SELECT tag_id FROM post_tags WHERE post_id = ?');
+        $currentTagsStmt->execute([$postId]);
+        $currentTags = $currentTagsStmt->fetchAll(PDO::FETCH_COLUMN); // Get current tag IDs
+
         // Check if the form is submitted to update the post
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $title = $_POST['title'];
             $content = $_POST['content'];
+            $category_id = $_POST['category_id'];
 
             // Update the post in the database
-            $updateStmt = $pdo->prepare('UPDATE posts SET title = ?, content = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
-            if ($updateStmt->execute([$title, $content, $postId])) {
+            $updateStmt = $pdo->prepare('UPDATE posts SET title = ?, content = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+            if ($updateStmt->execute([$title, $content, $category_id, $postId])) {
+
+                // Update tags(delete old ones and insert new ones)
+                $deleteTagsStmt = $pdo->prepare('DELETE FROM post_tags WHERE post_id = ?');
+                $deleteTagsStmt->execute([$postId]);
+
+                if (isset($_POST['tags'])) {
+                    $newTags = $_POST['tags'];
+                    foreach ($newTags as $tag_id) {
+                        $insertTagStmt = $pdo->prepare('INSERT INTO post_tags (post_id, tag_id) VALUES (?, ?)');
+                        $insertTagStmt->execute([$postId, $tag_id]);
+                    }
+                }
+
                 header('Location: posts.php');
             } else {
                 echo "Failed to update post...";
@@ -75,6 +84,25 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 <form action="edit_post.php?id=<?php echo $postId; ?>" method="post">
     <input type="text" name="title" value="<?php echo htmlspecialchars($post['title'] ?? ''); ?>" required>
     <textarea name="content" required><?php echo htmlspecialchars($post['content'] ?? ''); ?></textarea>
+    
+    <!-- Category Dropdown -->
+    <label for="category">Category</label>
+    <select name="category_id" id="category" required>
+        <?php foreach ($categories as $category): ?>
+            <option value="<?php echo $category['id']; ?>" <?php echo ($post['category_id'] == $category['id']) ? 'selected' : ''; ?>>
+                <?php echo $category['name']; ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+
+    <!-- Tags (Checkboxes) -->
+    <label for="tags">Tags:</label>
+    <br>
+    <?php foreach ($tags as $tag): ?>
+        <input type="checkbox" name="tags[]" value="<?php echo $tag['id']; ?>" <?php echo in_array($tag['id'], $currentTags) ? 'checked' : ''; ?>>
+        <?php echo $tag['name']; ?><br>
+    <?php endforeach; ?>
+    
     <button type="submit">Update Post</button>
 </form>
 
