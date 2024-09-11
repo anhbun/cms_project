@@ -80,30 +80,47 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 
 ?>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width", initial-scale="1.0">
+    <title>Edit Post</title>
+    <!-- Include CKEditor -->
+    <script src="https://cdn.ckeditor.com/4.16.0/standard/ckeditor.js"></script> <!-- This version is OUTDATED! -->
+</head>
+<body>
 <!-- Display the form to edit the post -->
-<form action="edit_post.php?id=<?php echo $postId; ?>" method="post">
-    <input type="text" name="title" value="<?php echo htmlspecialchars($post['title'] ?? ''); ?>" required>
-    <textarea name="content" required><?php echo htmlspecialchars($post['content'] ?? ''); ?></textarea>
-    
-    <!-- Category Dropdown -->
-    <label for="category">Category</label>
-    <select name="category_id" id="category" required>
-        <?php foreach ($categories as $category): ?>
-            <option value="<?php echo $category['id']; ?>" <?php echo ($post['category_id'] == $category['id']) ? 'selected' : ''; ?>>
-                <?php echo $category['name']; ?>
-            </option>
+    <form action="edit_post.php?id=<?php echo $postId; ?>" method="post">
+        <input type="text" name="title" value="<?php echo htmlspecialchars($post['title'] ?? ''); ?>" required>
+        <textarea name="content" required><?php echo htmlspecialchars($post['content'] ?? ''); ?></textarea>
+        
+        <!-- Category Dropdown -->
+        <label for="category">Category</label>
+        <select name="category_id" id="category" required>
+            <?php foreach ($categories as $category): ?>
+                <option value="<?php echo $category['id']; ?>" <?php echo ($post['category_id'] == $category['id']) ? 'selected' : ''; ?>>
+                    <?php echo $category['name']; ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
+        <!-- Tags (Checkboxes) -->
+        <label for="tags">Tags:</label>
+        <br>
+        <?php foreach ($tags as $tag): ?>
+            <input type="checkbox" name="tags[]" value="<?php echo $tag['id']; ?>" <?php echo in_array($tag['id'], $currentTags) ? 'checked' : ''; ?>>
+            <?php echo $tag['name']; ?><br>
         <?php endforeach; ?>
-    </select>
+        
+        <button type="submit">Update Post</button>
+    </form>
 
-    <!-- Tags (Checkboxes) -->
-    <label for="tags">Tags:</label>
-    <br>
-    <?php foreach ($tags as $tag): ?>
-        <input type="checkbox" name="tags[]" value="<?php echo $tag['id']; ?>" <?php echo in_array($tag['id'], $currentTags) ? 'checked' : ''; ?>>
-        <?php echo $tag['name']; ?><br>
-    <?php endforeach; ?>
-    
-    <button type="submit">Update Post</button>
-</form>
+    <!-- Initialize CKEditor -->
+    <script>
+        CKEDITOR.replace('content');
+    </script>
 
-<a href="posts.php">Back to Posts</a>
+    <a href="posts.php">Back to Posts</a>
+</body>
+</html>

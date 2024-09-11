@@ -57,25 +57,45 @@
     }
 ?>
 
-<form action="create_post.php" method="post">
-    <input type="text" name="title" placeholder="Post Title" required>
-    <textarea name="content" placeholder="Post Content" required></textarea>
-    
-    <!-- Category Dropdown -->
-    <label for="category">Category</label>
-    <select name="category_id" id="category" required>
-        <option value="">Select a category</option>
-        <?php foreach ($categories as $category): ?>
-            <option value="<?php echo $category['id']; ?>"><?php echo $category['name']; ?></option>
-        <?php endforeach; ?>
-    </select>
+<!-- HTML Form -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width", initial-scale="1.0">
+    <title>Create Post</title>
+    <!-- Include CKEditor -->
+    <script src="https://cdn.ckeditor.com/4.16.0/standard/ckeditor.js"></script> <!-- This version is OUTDATED! -->
+</head>
+<body>
+    <form action="create_post.php" method="post">
+        <input type="text" name="title" placeholder="Post Title" required>
+        <textarea name="content" placeholder="Post Content" required></textarea>
+        
+        <!-- Category Dropdown -->
+        <label for="category">Category</label>
+        <select name="category_id" id="category" required>
+            <option value="">Select a category</option>
+            <?php foreach ($categories as $category): ?>
+                <option value="<?php echo $category['id']; ?>"><?php echo $category['name']; ?></option>
+            <?php endforeach; ?>
+        </select>
 
-    <!-- Tags (Checkboxes) -->
-    <label for="tags">Tags:</label>
-    <br>
-    <?php foreach ($tags as $tag): ?>
-        <input type="checkbox" name="tags[]" value="<?php echo $tag['id']; ?>"> <?php echo $tag['name']; ?><br>
-    <?php endforeach; ?>
-    
-    <button type="submit"> Create Post </button>
-</form>
+        <!-- Tags (Checkboxes) -->
+        <label for="tags">Tags:</label>
+        <br>
+        <?php foreach ($tags as $tag): ?>
+            <input type="checkbox" name="tags[]" value="<?php echo $tag['id']; ?>"> <?php echo $tag['name']; ?><br>
+        <?php endforeach; ?>
+        
+        <button type="submit"> Create Post </button>
+    </form>
+
+    <!-- Initialize CKEditor -->
+    <script>
+        CKEDITOR.replace('content');
+    </script>
+
+    <a href="posts.php">Back to Posts</a>
+</body>
+</html>
