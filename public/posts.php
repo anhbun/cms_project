@@ -29,6 +29,19 @@
     $searchTerm = isset($_GET['search']) ? '%' . $_GET['search'] . '%' : '%';
     $stmt = $pdo->prepare('SELECT posts.*, users.username FROM posts JOIN users ON posts.author_id = users.id WHERE title LIKE ? OR content LIKE ? ORDER BY created_at DESC LIMIT ' . $limit . ' OFFSET ' . $offset);
     $stmt->execute([$searchTerm, $searchTerm]);
+
+    // Check if the user is an Admin or the post author
+    $is_admin = ($_SESSION['role'] === 'Admin');
+
+    // Display only published posts for regular users, but all posts for Admins and Authors
+    if ($is_admin) {
+        $stmt = $pdo->prepare('SELECT * FROM posts WHERE author_id = ? OR status = "published" ORDER BY created_at DESC');
+        $stmt->execute([$_SESSION['user_id']]);
+    } else {
+        $stmt = $pdo->prepare('SELECT * FROM posts WHERE status = "published" ORDER BY created_at DESC');
+        $stmt->execute();
+    }
+
     $posts = $stmt->fetchAll();
 
     // Display posts

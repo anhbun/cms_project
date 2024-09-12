@@ -30,12 +30,13 @@
         $title = $_POST['title'];
         $content = $_POST['content'];
         $author_id = $_SESSION['user_id'];
+        $status = $_POST['status'];
         // Default category if not selected
         $category_id = isset($_POST['category_id']) && !empty($_POST['category_id']) ? $_POST['category_id'] : 1; // Use default category ID
 
         // Insert the post with the selected category or default category
-        $stmt = $pdo->prepare('INSERT INTO posts (title, content, author_id, category_id) VALUES (?, ?, ?, ?)');
-        if ($stmt->execute([$title, $content, $author_id, $category_id])) {
+        $stmt = $pdo->prepare('INSERT INTO posts (title, content, author_id, category_id, status) VALUES (?, ?, ?, ?, ?)');
+        if ($stmt->execute([$title, $content, $author_id, $category_id, $status])) {
             // Get the ID of the insert post
             $post_id = $pdo->lastInsertId();
 
@@ -89,6 +90,13 @@
         <?php endforeach; ?>
         
         <button type="submit"> Create Post </button>
+
+        <!-- Post Status (Draft or Published) -->
+        <label for="status">Post Status: </label>
+        <select name="status" id="status">
+            <option value="draft">Save as Draft</option>
+            <option value="published">Publish Now</option>
+        </select>
     </form>
 
     <!-- Initialize CKEditor -->

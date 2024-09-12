@@ -47,10 +47,11 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
             $title = $_POST['title'];
             $content = $_POST['content'];
             $category_id = $_POST['category_id'];
+            $status = $_POST['status'];
 
             // Update the post in the database
-            $updateStmt = $pdo->prepare('UPDATE posts SET title = ?, content = ?, category_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
-            if ($updateStmt->execute([$title, $content, $category_id, $postId])) {
+            $updateStmt = $pdo->prepare('UPDATE posts SET title = ?, content = ?, category_id = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+            if ($updateStmt->execute([$title, $content, $category_id, $status, $postId])) {
 
                 // Update tags(delete old ones and insert new ones)
                 $deleteTagsStmt = $pdo->prepare('DELETE FROM post_tags WHERE post_id = ?');
@@ -112,7 +113,14 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
             <input type="checkbox" name="tags[]" value="<?php echo $tag['id']; ?>" <?php echo in_array($tag['id'], $currentTags) ? 'checked' : ''; ?>>
             <?php echo $tag['name']; ?><br>
         <?php endforeach; ?>
-        
+
+        <!-- Post Status -->
+        <label for="status">Post Status: </label>
+        <select name="status" id="status">
+            <option value="draft" <?php if ($post['status'] === 'draft') echo 'selected'; ?>>Save as Draft</option>
+            <option value="published" <?php if ($post['status'] === 'published') echo 'selected'; ?>>Publish Now</option>
+        </select>
+
         <button type="submit">Update Post</button>
     </form>
 
