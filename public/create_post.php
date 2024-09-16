@@ -34,9 +34,27 @@
         // Default category if not selected
         $category_id = isset($_POST['category_id']) && !empty($_POST['category_id']) ? $_POST['category_id'] : 1; // Use default category ID
 
+        // Handle the file upload
+        $imagePath = null;
+        if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+            // Use the relative path to store in the database
+            $imagePath = 'uploads/' . basename($_FILES["image"]["name"]);
+            // Use the absolute path for moving the file
+            $absolutePath = '/Applications/XAMPP/xamppfiles/htdocs/cms_project/' . $imagePath;
+
+            // Move the uploaded files
+            if (move_uploaded_file($_FILES["image"]["tmp_name"], $absolutePath)) {
+                echo "File uploaded successfully: " . $imagePath;
+            } else {
+                echo "Failed to move uploaded file.";
+                echo "Image upload error: " . $_FILES['image']['error'];
+                echo "Absolute path: " . $absolutePath;
+            }
+        }
+
         // Insert the post with the selected category or default category
-        $stmt = $pdo->prepare('INSERT INTO posts (title, content, author_id, category_id, status) VALUES (?, ?, ?, ?, ?)');
-        if ($stmt->execute([$title, $content, $author_id, $category_id, $status])) {
+        $stmt = $pdo->prepare('INSERT INTO posts (title, content, author_id, category_id, status, image) VALUES (?, ?, ?, ?, ?, ?)');
+        if ($stmt->execute([$title, $content, $author_id, $category_id, $status, $imagePath])) {
             // Get the ID of the insert post
             $post_id = $pdo->lastInsertId();
 
@@ -69,18 +87,18 @@
     <script src="https://cdn.ckeditor.com/4.16.0/standard/ckeditor.js"></script> <!-- This version is OUTDATED! -->
 </head>
 <body>
-    <form action="create_post.php" method="post">
+    <form action="create_post.php" method="post" enctype="multipart/form-data">
         <input type="text" name="title" placeholder="Post Title" required>
         <textarea name="content" placeholder="Post Content" required></textarea>
         
         <!-- Category Dropdown -->
-        <label for="category">Category</label>
+        <label for="category"> Category</label>
         <select name="category_id" id="category" required>
             <option value="">Select a category</option>
             <?php foreach ($categories as $category): ?>
                 <option value="<?php echo $category['id']; ?>"><?php echo $category['name']; ?></option>
             <?php endforeach; ?>
-        </select>
+        </select><br>
 
         <!-- Tags (Checkboxes) -->
         <label for="tags">Tags:</label>
@@ -88,15 +106,19 @@
         <?php foreach ($tags as $tag): ?>
             <input type="checkbox" name="tags[]" value="<?php echo $tag['id']; ?>"> <?php echo $tag['name']; ?><br>
         <?php endforeach; ?>
-        
-        <button type="submit"> Create Post </button>
+
+        <!-- Image Upload -->
+        <label for="image">Upload an Image: </label>
+        <input type="file" name="image" accept="image/*"><br>
 
         <!-- Post Status (Draft or Published) -->
         <label for="status">Post Status: </label>
         <select name="status" id="status">
             <option value="draft">Save as Draft</option>
             <option value="published">Publish Now</option>
-        </select>
+        </select><br>
+
+        <button type="submit"> Create Post </button>
     </form>
 
     <!-- Initialize CKEditor -->
