@@ -76,56 +76,85 @@
     }
 ?>
 
-<!-- HTML Form -->
+<!-- HTML Form with Bootstrap -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width", initial-scale="1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Post</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8efd4; /* Warm color background */
+            color: #563d7c; /* Text color */
+        }
+    </style>
     <!-- Include CKEditor -->
-    <script src="https://cdn.ckeditor.com/4.16.0/standard/ckeditor.js"></script> <!-- This version is OUTDATED! -->
+    <script src="https://cdn.ckeditor.com/4.16.0/standard/ckeditor.js"></script>
 </head>
-<body>
-    <form action="create_post.php" method="post" enctype="multipart/form-data">
-        <input type="text" name="title" placeholder="Post Title" required>
-        <textarea name="content" placeholder="Post Content" required></textarea>
-        
+<body class="container my-5">
+    <h1 class="text-center mb-4">Create a New Post</h1>
+
+    <form action="create_post.php" method="post" enctype="multipart/form-data" class="shadow p-4 rounded bg-light">
+        <!-- Title -->
+        <div class="mb-3">
+            <label for="title" class="form-label">Post Title</label>
+            <input type="text" name="title" class="form-control" placeholder="Enter title" required>
+        </div>
+
+        <!-- Content -->
+        <div class="mb-3">
+            <label for="content" class="form-label">Post Content</label>
+            <textarea name="content" class="form-control" placeholder="Write your content here" required></textarea>
+        </div>
+
         <!-- Category Dropdown -->
-        <label for="category"> Category</label>
-        <select name="category_id" id="category" required>
-            <option value="">Select a category</option>
-            <?php foreach ($categories as $category): ?>
-                <option value="<?php echo $category['id']; ?>"><?php echo $category['name']; ?></option>
-            <?php endforeach; ?>
-        </select><br>
+        <div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+            <select name="category_id" class="form-select" required>
+                <option value="">Select a category</option>
+                <?php foreach ($categories as $category): ?>
+                    <option value="<?php echo $category['id']; ?>"><?php echo $category['name']; ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
 
         <!-- Tags (Checkboxes) -->
-        <label for="tags">Tags:</label>
-        <br>
-        <?php foreach ($tags as $tag): ?>
-            <input type="checkbox" name="tags[]" value="<?php echo $tag['id']; ?>"> <?php echo $tag['name']; ?><br>
-        <?php endforeach; ?>
+        <div class="mb-3">
+            <label for="tags" class="form-label">Tags</label><br>
+            <?php foreach ($tags as $tag): ?>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="tags[]" value="<?php echo $tag['id']; ?>">
+                    <label class="form-check-label"><?php echo $tag['name']; ?></label>
+                </div>
+            <?php endforeach; ?>
+        </div>
 
         <!-- Image Upload -->
-        <label for="image">Upload an Image: </label>
-        <input type="file" name="image" accept="image/*"><br>
+        <div class="mb-3">
+            <label for="image" class="form-label">Upload an Image</label>
+            <input type="file" name="image" class="form-control" accept="image/*">
+        </div>
 
-        <!-- Post Status (Draft or Published) -->
-        <label for="status">Post Status: </label>
-        <select name="status" id="status">
-            <option value="draft">Save as Draft</option>
-            <option value="published">Publish Now</option>
-        </select><br>
+        <!-- Post Status -->
+        <div class="mb-3">
+            <label for="status" class="form-label">Post Status</label>
+            <select name="status" class="form-select">
+                <option value="draft">Save as Draft</option>
+                <option value="published">Publish Now</option>
+            </select>
+        </div>
 
-        <button type="submit"> Create Post </button>
+        <button type="submit" class="btn btn-primary btn-lg w-100">Create Post</button>
     </form>
+
+    <a href="posts.php" class="btn btn-link mt-4">Back to Posts</a>
 
     <!-- Initialize CKEditor -->
     <script>
         CKEDITOR.replace('content');
     </script>
-
-    <a href="posts.php">Back to Posts</a>
 </body>
 </html>

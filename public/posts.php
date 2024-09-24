@@ -1,18 +1,10 @@
-<!-- public/posts.php -->
-
+<!-- posts.php -->
 <?php
-    // DEBUGGING
-    error_reporting(E_ALL);
-    ini_set('display errors', 1);
-
     require __DIR__ . '/../vendor/autoload.php';
 
     use Nibun\CmsProject\Database;
 
     session_start();
-
-    // Display user role
-    echo "Role: " . $_SESSION['role'] . "<br>";
 
     // Establish connection first
     $config = require __DIR__ . '/../config/database.php';
@@ -61,8 +53,6 @@
             break;    
     }
 
-
-
     if ($is_admin) {
         // Admins can see all posts, or posts where they're the author
         $stmt = $pdo->prepare(
@@ -99,83 +89,106 @@
 
     $posts = $stmt->fetchAll();
 
-    // Display posts
-    echo "<br><a href='create_post.php'> New </a>";
-
-    foreach ($posts as $post) {
-        echo "<h2>{$post['title']}</h2>";
-        echo "<p>By: {$post['username']} on {$post['created_at']}</p>";
-        
-        // Display the image if it exists
-        if ($post['image']) {
-            echo "<img src='/cms_project/{$post['image']}' alt='post-image' style='max-width: 200px;'><br>";
-        }
-
-        echo "<p>{$post['content']}</p>";
-        echo "<a href='edit_post.php?id={$post['id']}'>Edit</a> | ";
-        echo "<a href='delete_post.php?id={$post['id']}'>Delete</a>";
-        echo "<hr>";
-    }
-
-    // Pagination controls
-    echo "<div style=''margin-top: 20px;>";
-
-    // Show total number of posts
-    echo "<p>Total Posts: $totalPosts</p>";
-
-    // 'Previous' button (disabled is on the first page)
-    if ($page > 1) {
-        echo "<a href='posts.php?page=" . ($page - 1) . "'>Previous </a>";
-    } else {
-        echo "<span style='color: gray;'>Previous </span>";       
-    }
-
-    // Page number links (1, 2, 3...)
-    for ($i = 1; $i <= $totalPages; $i++) {
-        if ($i == $page) {
-            echo "<strong>$i </strong>"; // Current page
-        } else {
-            echo "<a href='posts.php?page=$i'>$i </a>";
-        }
-    }
-
-    // "Next" button (disabled if on the last page)
-    if ($page < $totalPages) {
-        echo "<a href='posts.php?page=" . ($page + 1) . "'>Next</a>";
-    } else {
-        echo "<span style='color: gray;'>Next</span>";
-    }
-
-    echo "<p>Page $page of $totalPages</p>";
-    echo "</div>";
 ?>
 
-<!-- Search Form -->
-<form action="posts.php" method="GET">
-    <input type="text" name="search" placeholder="Search posts...">
-    <button type="submit">Search</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posts</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8efd4;
+            color: #563d7c;
+        }
+        .btn-custom {
+            background-color: #ff7f50;
+            color: white;
+        }
+        .btn-custom:hover {
+            background-color: #ff6347;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Posts</h1>
 
-<!-- Go to Page Input -->
-<form action="posts.php" method="GET" style="margin-top: 10px;">
-    <label for="page">Go to page:</label>
-    <input type="number" name="page" min="1" max="<?php echo $totalPages; ?>" value="<?php echo $page; ?>">
-    <button type="submit">Go</button>
-</form>
+    <!-- Back to Dashboard Button -->
+    <div class="mb-4 text-end">
+        <a href="dashboard.php" class="btn btn-primary">Back to Dashboard</a>
+    </div>
 
-<!-- Sorting Options Form -->
-<form action="posts.php" method="GET" style="margin-bottom: 20px;">
-    <label for="sort_by">Sort by: </label>
-    <select name="sort_by" id="sort_by" onchange="this.form.submit()">
-        <option value="date_asc" <?php if ($sort_by == 'date_asc') echo 'selected'; ?>>Date (Newest to Oldest)</option>
-        <option value="date_desc" <?php if ($sort_by == 'date_desc') echo 'selected'; ?>>Date (Oldest to Newest)</option>
-        <option value="title_asc" <?php if ($sort_by == 'title_asc') echo 'selected'; ?>>Title (A-Z)</option>
-        <option value="title_desc" <?php if ($sort_by == 'title_desc') echo 'selected'; ?>>Title (Title Z-A)</option>
-        <option value="author_asc" <?php if ($sort_by == 'author_asc') echo 'selected'; ?>>Author (A-Z)</option>
-        <option value="author_desc" <?php if ($sort_by == 'author_desc') echo 'selected'; ?>>Author (Z-A)</option>
-    </select>
-    <input type="hidden" name="search" value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
-    <input type="hidden" name="page" value="<?php echo $page; ?>">
-</form>
+    <!-- Search Form -->
+    <form action="posts.php" method="GET" class="mb-3">
+        <div class="input-group">
+            <input type="text" class="form-control" name="search" placeholder="Search posts..." value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
+            <button type="submit" class="btn btn-custom">Search</button>
+        </div>
+    </form>
 
-<a href="dashboard.php">Back to Dashboard</a>
+    <!-- Sorting Form -->
+    <form action="posts.php" method="GET" class="mb-3">
+        <div class="input-group">
+            <label for="sort_by" class="input-group-text">Sort by:</label>
+            <select name="sort_by" id="sort_by" class="form-select" onchange="this.form.submit()">
+                <option value="date_desc" <?php if ($sort_by == 'date_desc') echo 'selected'; ?>>Date (Newest to Oldest)</option>
+                <option value="date_asc" <?php if ($sort_by == 'date_asc') echo 'selected'; ?>>Date (Oldest to Newest)</option>
+                <option value="title_asc" <?php if ($sort_by == 'title_asc') echo 'selected'; ?>>Title (A-Z)</option>
+                <option value="title_desc" <?php if ($sort_by == 'title_desc') echo 'selected'; ?>>Title (Z-A)</option>
+                <option value="author_asc" <?php if ($sort_by == 'author_asc') echo 'selected'; ?>>Author (A-Z)</option>
+                <option value="author_desc" <?php if ($sort_by == 'author_desc') echo 'selected'; ?>>Author (Z-A)</option>
+            </select>
+        </div>
+    </form>
+
+    <div class="row">
+        <div class="col-md-12 mb-3 text-end">
+            <a href="create_post.php" class="btn btn-custom">New Post</a>
+        </div>
+
+        <!-- Post Loop -->
+        <?php foreach ($posts as $post): ?>
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <?php if ($post['image']): ?>
+                        <img src="/cms_project/<?php echo $post['image']; ?>" class="card-img-top" alt="Post Image">
+                    <?php endif; ?>
+                    <div class="card-body">
+                        <h5 class="card-title"><?php echo $post['title']; ?></h5>
+                        <p class="card-text">By: <?php echo $post['username']; ?> on <?php echo $post['created_at']; ?></p>
+                        <p class="card-text"><?php echo substr($post['content'], 0, 100); ?>...</p>
+                        <a href="edit_post.php?id=<?php echo $post['id']; ?>" class="btn btn-warning">Edit</a>
+                        <a href="delete_post.php?id=<?php echo $post['id']; ?>" class="btn btn-danger">Delete</a>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+
+    <!-- Pagination -->
+    <nav class="pagination-controls">
+        <ul class="pagination justify-content-center">
+            <li class="page-item <?php if ($page <= 1) echo 'disabled'; ?>">
+                <a class="page-link" href="<?php if ($page > 1) { echo 'posts.php?page=' . ($page - 1); } else { echo '#'; } ?>">Previous</a>
+            </li>
+
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                <li class="page-item <?php if ($i == $page) echo 'active'; ?>">
+                    <a class="page-link" href="posts.php?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                </li>
+            <?php endfor; ?>
+
+            <li class="page-item <?php if ($page >= $totalPages) echo 'disabled'; ?>">
+                <a class="page-link" href="<?php if ($page < $totalPages) { echo 'posts.php?page=' . ($page + 1); } else { echo '#'; } ?>">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<!-- Include Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
