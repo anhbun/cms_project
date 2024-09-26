@@ -1,5 +1,3 @@
-<!-- public/edit_post.php -->
-
 <?php
     require __DIR__ . '/../vendor/autoload.php';
 
@@ -52,7 +50,7 @@
                 $updateStmt = $pdo->prepare('UPDATE posts SET title = ?, content = ?, category_id = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
                 if ($updateStmt->execute([$title, $content, $category_id, $status, $postId])) {
 
-                    // Update tags(delete old ones and insert new ones)
+                    // Update tags
                     $deleteTagsStmt = $pdo->prepare('DELETE FROM post_tags WHERE post_id = ?');
                     $deleteTagsStmt->execute([$postId]);
 
@@ -85,93 +83,89 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Post</title>
-    <!-- Include Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Custom Styles -->
+    <script src="https://cdn.ckeditor.com/4.16.0/standard/ckeditor.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    
     <style>
         body {
-            background-color: #f8efd4; /* Warm color background */
-            color: #563d7c; /* Warm color for text */
-        }
-        .form-container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+            background-color: #f8e5d3;
+            color: #563d7c;
         }
         .btn-custom {
-            background-color: #ff7f50;
+            background-color: #e27d60;
+            border-color: #e27d60;
             color: white;
         }
         .btn-custom:hover {
-            background-color: #ff6347;
+            background-color: #c4563c;
+            border-color: #c4563c;
             color: white;
+        }
+        .btn-link {
+            color: #563d7c;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="form-container">
-            <h2 class="text-center">Edit Post</h2>
-            <form action="edit_post.php?id=<?php echo $postId; ?>" method="post" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <label for="title" class="form-label">Title</label>
-                    <input type="text" class="form-control" name="title" value="<?php echo htmlspecialchars($post['title'] ?? ''); ?>" required>
-                </div>
+<body class="container my-5">
+    <h1 class="text-center mb-4">Edit Post</h1>
 
-                <div class="mb-3">
-                    <label for="content" class="form-label">Content</label>
-                    <textarea class="form-control" name="content" id="content" required><?php echo htmlspecialchars($post['content'] ?? ''); ?></textarea>
-                </div>
-
-                <!-- Category Dropdown -->
-                <div class="mb-3">
-                    <label for="category" class="form-label">Category</label>
-                    <select class="form-select" name="category_id" id="category" required>
-                        <?php foreach ($categories as $category): ?>
-                            <option value="<?php echo $category['id']; ?>" <?php echo ($post['category_id'] == $category['id']) ? 'selected' : ''; ?>>
-                                <?php echo $category['name']; ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <!-- Tags (Checkboxes) -->
-                <div class="mb-3">
-                    <label for="tags" class="form-label">Tags</label><br>
-                    <?php foreach ($tags as $tag): ?>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="tags[]" value="<?php echo $tag['id']; ?>" <?php echo in_array($tag['id'], $currentTags) ? 'checked' : ''; ?>>
-                            <label class="form-check-label" for="tags"><?php echo $tag['name']; ?></label>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-
-                <!-- Post Status -->
-                <div class="mb-3">
-                    <label for="status" class="form-label">Post Status</label>
-                    <select class="form-select" name="status" id="status">
-                        <option value="draft" <?php if ($post['status'] === 'draft') echo 'selected'; ?>>Save as Draft</option>
-                        <option value="published" <?php if ($post['status'] === 'published') echo 'selected'; ?>>Publish Now</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn btn-custom w-100">Update Post</button>
-            </form>
-            <div class="text-center mt-3">
-                <a href="posts.php" class="btn btn-link">Back to Posts</a>
-            </div>
+    <form action="edit_post.php?id=<?php echo $postId; ?>" method="post" enctype="multipart/form-data" class="shadow p-4 rounded bg-light">
+        <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control" name="title" value="<?php echo htmlspecialchars($post['title'] ?? ''); ?>" required>
         </div>
+
+        <div class="mb-3">
+            <label for="content" class="form-label">Content</label>
+            <textarea class="form-control" name="content" id="content" required><?php echo htmlspecialchars($post['content'] ?? ''); ?></textarea>
+        </div>
+
+        <!-- Category Dropdown -->
+        <div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+            <select class="form-select" name="category_id" id="category" required>
+                <?php foreach ($categories as $category): ?>
+                    <option value="<?php echo $category['id']; ?>" <?php echo ($post['category_id'] == $category['id']) ? 'selected' : ''; ?>>
+                        <?php echo $category['name']; ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <!-- Tags Checkbox -->
+        <div class="mb-3">
+            <label for="tags" class="form-label">Tags</label><br>
+            <?php foreach ($tags as $tag): ?>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="tags[]" value="<?php echo $tag['id']; ?>" <?php echo in_array($tag['id'], $currentTags) ? 'checked' : ''; ?>>
+                    <label class="form-check-label" for="tags"><?php echo $tag['name']; ?></label>
+                </div>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- Image Upload -->
+        <div class="mb-3">
+            <label for="image" class="form-label">Upload an Image</label>
+            <input type="file" name="image" class="form-control" accept="image/*">
+        </div>
+
+        <!-- Status of Post -->
+        <div class="mb-3">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" name="status" id="status">
+                <option value="draft" <?php if ($post['status'] === 'draft') echo 'selected'; ?>>Save as Draft</option>
+                <option value="published" <?php if ($post['status'] === 'published') echo 'selected'; ?>>Publish Now</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-custom btn-lg w-100">Update Post</button>
+    </form>
+
+    <div class="text-center mt-3">
+        <a href="posts.php" class="btn btn-link">Back to Posts</a>
     </div>
 
-    <!-- Include CKEditor and Bootstrap JS -->
-    <script src="https://cdn.ckeditor.com/4.16.0/standard/ckeditor.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Initialize CKEditor -->
     <script>
         CKEDITOR.replace('content');
     </script>

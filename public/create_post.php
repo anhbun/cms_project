@@ -1,5 +1,3 @@
-<!-- public/create_post.php -->
-
 <?php
     require __DIR__ . '/../vendor/autoload.php';
 
@@ -83,12 +81,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Post</title>
-    <!-- Include Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f8efd4; /* Warm color background */
-            color: #563d7c; /* Text color */
+            background-color: #f8e5d3;
+            color: #563d7c;
+        }
+        .btn-primary {
+            background-color: #e27d60;
+            border-color: #e27d60;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #c4563c;
+            border-color: #c4563c;
+            color: white;
+        }
+        .btn-link {
+            color: #563d7c;
         }
     </style>
     <!-- Include CKEditor -->
@@ -100,13 +110,13 @@
     <form action="create_post.php" method="post" enctype="multipart/form-data" class="shadow p-4 rounded bg-light">
         <!-- Title -->
         <div class="mb-3">
-            <label for="title" class="form-label">Post Title</label>
+            <label for="title" class="form-label">Title</label>
             <input type="text" name="title" class="form-control" placeholder="Enter title" required>
         </div>
 
         <!-- Content -->
         <div class="mb-3">
-            <label for="content" class="form-label">Post Content</label>
+            <label for="content" class="form-label">Content</label>
             <textarea name="content" class="form-control" placeholder="Write your content here" required></textarea>
         </div>
 
@@ -140,7 +150,7 @@
 
         <!-- Post Status -->
         <div class="mb-3">
-            <label for="status" class="form-label">Post Status</label>
+            <label for="status" class="form-label">Status</label>
             <select name="status" class="form-select">
                 <option value="draft">Save as Draft</option>
                 <option value="published">Publish Now</option>
@@ -150,7 +160,9 @@
         <button type="submit" class="btn btn-primary btn-lg w-100">Create Post</button>
     </form>
 
-    <a href="posts.php" class="btn btn-link mt-4">Back to Posts</a>
+    <div class="text-center mt-3">
+        <a href="posts.php" class="btn btn-link">Back to Posts</a>
+    </div>
 
     <!-- Initialize CKEditor -->
     <script>
